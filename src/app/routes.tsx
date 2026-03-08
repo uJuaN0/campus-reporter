@@ -5,6 +5,7 @@ import { AchadosPerdidos } from "./components/AchadosPerdidos";
 import { Eventos } from "./components/Eventos";
 import { Reportacoes } from "./components/Reportacoes";
 import { Reportar } from "./components/Reportar";
+import { Administracao } from "./components/Administracao";
 
 export const router = createBrowserRouter(
   [
@@ -16,11 +17,12 @@ export const router = createBrowserRouter(
         { path: "reportacoes", element: <Reportacoes /> },
         { path: "achados-perdidos", element: <AchadosPerdidos /> },
         { path: "eventos", element: <Eventos /> },
-        { path: "reportar", element: <Reportar /> }
-      ]
-    }
+        { path: "reportar", element: <Reportar /> },
+        { path: "administracao", element: <Administracao /> },
+      ],
+    },
   ],
   {
-    basename: "/campus-reporter/"
+    basename: "/campus-reporter/",
   }
 );

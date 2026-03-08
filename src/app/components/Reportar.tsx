@@ -8,13 +8,44 @@ import { toast } from "sonner";
 import { PlusCircle, Upload, AlertCircle, Package } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 
+const problemCategories = [
+  "Luz fundida",
+  "Porta estragada",
+  "Equipamento avariado",
+  "Tomada sem funcionar",
+  "Água / canalização",
+  "Limpeza",
+  "Outro",
+];
+
+const lostFoundCategories = [
+  "Telefone",
+  "Vestuário",
+  "Material escolar",
+  "Carteira",
+  "Chaves",
+  "Eletrónicos",
+  "Outro",
+];
+
 export function Reportar() {
   const [tipo, setTipo] = useState("Problema");
+  const [category, setCategory] = useState(problemCategories[0]);
   const [titulo, setTitulo] = useState("");
   const [descricao, setDescricao] = useState("");
   const [localizacao, setLocalizacao] = useState("");
   const [imagemBase64, setImagemBase64] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  const currentCategories =
+    tipo === "Problema" ? problemCategories : lostFoundCategories;
+
+  function handleTypeChange(nextType: string) {
+    setTipo(nextType);
+    setCategory(
+      nextType === "Problema" ? problemCategories[0] : lostFoundCategories[0]
+    );
+  }
 
   function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -35,8 +66,8 @@ export function Reportar() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    if (!titulo || !descricao || !localizacao) {
-      toast.error("Preenche título, descrição e localização.");
+    if (!titulo || !descricao || !localizacao || !category) {
+      toast.error("Preenche título, descrição, localização e categoria.");
       return;
     }
 
@@ -55,6 +86,7 @@ export function Reportar() {
 
     const payload = {
       type: tipo,
+      category,
       title: titulo,
       description: descricao,
       location: localizacao,
@@ -81,6 +113,7 @@ export function Reportar() {
     );
 
     setTipo("Problema");
+    setCategory(problemCategories[0]);
     setTitulo("");
     setDescricao("");
     setLocalizacao("");
@@ -112,7 +145,7 @@ export function Reportar() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <button
                 type="button"
-                onClick={() => setTipo("Problema")}
+                onClick={() => handleTypeChange("Problema")}
                 className={`rounded-xl border p-4 text-left transition ${
                   tipo === "Problema"
                     ? "border-red-300 bg-red-50"
@@ -130,7 +163,7 @@ export function Reportar() {
 
               <button
                 type="button"
-                onClick={() => setTipo("Perdido e Achado")}
+                onClick={() => handleTypeChange("Perdido e Achado")}
                 className={`rounded-xl border p-4 text-left transition ${
                   tipo === "Perdido e Achado"
                     ? "border-amber-300 bg-amber-50"
@@ -145,6 +178,23 @@ export function Reportar() {
                   Registar um item perdido ou encontrado no campus.
                 </p>
               </button>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Categoria *
+              </label>
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="flex h-10 w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                {currentCategories.map((item) => (
+                  <option key={item} value={item}>
+                    {item}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div>
@@ -208,7 +258,7 @@ export function Reportar() {
             ) : null}
 
             <Button type="submit" className="w-full" disabled={submitting}>
-              {submitting ? "A submeter..." : "Submeter problema"}
+              {submitting ? "A submeter..." : "Submeter reporte"}
             </Button>
           </form>
         </CardContent>

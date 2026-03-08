@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Calendar, Clock3, Plus, Trash2, User } from "lucide-react";
 import { supabase } from "../lib/supabase";
 
@@ -33,6 +33,8 @@ export function Eventos() {
   const [loading, setLoading] = useState(true);
 
   const [open, setOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<EventItem | null>(null);
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [eventDate, setEventDate] = useState("");
@@ -77,6 +79,12 @@ export function Eventos() {
 
     setLoading(false);
   }
+
+  const orderedEvents = useMemo(() => {
+    return [...events].sort(
+      (a, b) => new Date(a.event_date).getTime() - new Date(b.event_date).getTime()
+    );
+  }, [events]);
 
   function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -152,10 +160,7 @@ export function Eventos() {
     const confirmed = window.confirm("Tens a certeza que queres apagar este evento?");
     if (!confirmed) return;
 
-    const { error } = await supabase
-      .from("events")
-      .delete()
-      .eq("id", id);
+    const { error } = await supabase.from("events").delete().eq("id", id);
 
     if (error) {
       console.error(error);
@@ -164,6 +169,7 @@ export function Eventos() {
     }
 
     toast.success("Evento apagado.");
+    setSelectedEvent(null);
     await loadAll();
   }
 
@@ -262,17 +268,21 @@ export function Eventos() {
 
       {loading ? (
         <p className="text-center text-gray-500">A carregar eventos...</p>
-      ) : events.length === 0 ? (
+      ) : orderedEvents.length === 0 ? (
         <div className="text-center py-12">
           <Calendar className="w-16 h-16 text-gray-300 mx-auto mb-4" />
           <p className="text-gray-500">Ainda não há eventos.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {events.map((event) => (
-            <Card key={event.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {orderedEvents.map((event) => (
+            <Card
+              key={event.id}
+              className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+              onClick={() => setSelectedEvent(event)}
+            >
               {event.image_url ? (
-                <div className="aspect-video bg-gray-100 overflow-hidden">
+                <div className="aspect-[16/9] bg-gray-100 overflow-hidden">
                   <ImageWithFallback
                     src={event.image_url}
                     alt={event.title}
@@ -281,17 +291,17 @@ export function Eventos() {
                 </div>
               ) : null}
 
-              <CardHeader>
-                <CardTitle>{event.title}</CardTitle>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg line-clamp-2">{event.title}</CardTitle>
 
-                <CardDescription className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm">
-                    <Calendar className="w-4 h-4" />
+                <CardDescription className="space-y-1">
+                  <div className="flex items-center gap-2 text-xs">
+                    <Calendar className="w-3.5 h-3.5" />
                     <span>Início: {formatDate(event.event_date)}</span>
                   </div>
 
-                  <div className="flex items-center gap-2 text-sm">
-                    <Clock3 className="w-4 h-4" />
+                  <div className="flex items-center gap-2 text-xs">
+                    <Clock3 className="w-3.5 h-3.5" />
                     <span>
                       Fim:{" "}
                       {event.event_end_date
@@ -300,31 +310,102 @@ export function Eventos() {
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-2 text-sm">
-                    <User className="w-4 h-4" />
+                  <div className="flex items-center gap-2 text-xs">
+                    <User className="w-3.5 h-3.5" />
                     <span>{event.created_by_email || "Desconhecido"}</span>
                   </div>
                 </CardDescription>
               </CardHeader>
 
-              <CardContent>
-                <p className="text-gray-600 mb-4">{event.description}</p>
+              <CardContent className="pt-0">
+                <p className="text-sm text-gray-600 line-clamp-3 mb-4">
+                  {event.description}
+                </p>
 
                 {role === "admin" && (
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => handleDeleteEvent(event.id)}
-                  >
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    Apagar Evento
-                  </Button>
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => handleDeleteEvent(event.id)}
+                    >
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      Apagar Evento
+                    </Button>
+                  </div>
                 )}
               </CardContent>
             </Card>
           ))}
         </div>
       )}
+
+      <Dialog open={!!selectedEvent} onOpenChange={(open) => !open && setSelectedEvent(null)}>
+        <DialogContent className="w-[95vw] max-w-5xl max-h-[90vh] overflow-y-auto">
+          {selectedEvent && (
+            <>
+              <DialogHeader>
+                <DialogTitle>{selectedEvent.title}</DialogTitle>
+                <DialogDescription>
+                  Informação detalhada do evento
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-5">
+                {selectedEvent.image_url ? (
+                  <div className="rounded-xl overflow-hidden border">
+                    <ImageWithFallback
+                      src={selectedEvent.image_url}
+                      alt={selectedEvent.title}
+                      className="w-full max-h-[55vh] object-cover rounded-xl"
+                    />
+                  </div>
+                ) : null}
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-gray-600">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4" />
+                    Início: {formatDate(selectedEvent.event_date)}
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <Clock3 className="w-4 h-4" />
+                    Fim:{" "}
+                    {selectedEvent.event_end_date
+                      ? formatDate(selectedEvent.event_end_date)
+                      : "Sem fim definido"}
+                  </div>
+
+                  <div className="flex items-center gap-2 sm:col-span-2">
+                    <User className="w-4 h-4" />
+                    {selectedEvent.created_by_email || "Desconhecido"}
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-2">Descrição</h4>
+                  <p className="text-gray-700 whitespace-pre-wrap">
+                    {selectedEvent.description}
+                  </p>
+                </div>
+
+                {role === "admin" && (
+                  <div className="border-t pt-4">
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => handleDeleteEvent(selectedEvent.id)}
+                    >
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      Apagar Evento
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

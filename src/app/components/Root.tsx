@@ -5,15 +5,46 @@ import {
   Package,
   Calendar,
   PlusCircle,
+  Shield,
   Menu,
   X,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 
 export function Root() {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [role, setRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    loadRole();
+  }, []);
+
+  async function loadRole() {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      setRole(null);
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Erro ao carregar role:", error);
+      setRole(null);
+      return;
+    }
+
+    setRole(data?.role ?? null);
+  }
 
   async function handleLogout() {
     await supabase.auth.signOut();
@@ -25,6 +56,9 @@ export function Root() {
     { name: "Perdidos & Achados", href: "/achados-perdidos", icon: Package },
     { name: "Eventos", href: "/eventos", icon: Calendar },
     { name: "Reportar", href: "/reportar", icon: PlusCircle },
+    ...(role === "admin"
+      ? [{ name: "Administração", href: "/administracao", icon: Shield }]
+      : []),
   ];
 
   const isActive = (path: string) => {
@@ -36,40 +70,28 @@ export function Root() {
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow-sm border-b sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-
           <div className="flex items-center justify-between">
-
-            {/* LOGO */}
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-blue-700 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-lg">NC</span>
               </div>
 
               <div>
-                <h1 className="text-xl font-bold text-gray-900">
-                  NOVA Connect
-                </h1>
+                <h1 className="text-xl font-bold text-gray-900">NOVA Connect</h1>
                 <p className="text-xs text-gray-500">
                   Faculdade de Ciências e Tecnologia
                 </p>
               </div>
             </div>
 
-            {/* MOBILE MENU BUTTON */}
             <button
               className="md:hidden p-2 rounded-lg hover:bg-gray-100"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
-              {mobileMenuOpen ? (
-                <X className="w-6 h-6" />
-              ) : (
-                <Menu className="w-6 h-6" />
-              )}
+              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
 
-            {/* DESKTOP MENU */}
             <div className="hidden md:flex items-center gap-2">
-
               <nav className="flex items-center gap-2">
                 {navigation.map((item) => {
                   const Icon = item.icon;
@@ -97,14 +119,11 @@ export function Root() {
               >
                 Sair
               </button>
-
             </div>
           </div>
 
-          {/* MOBILE MENU */}
           {mobileMenuOpen && (
             <div className="md:hidden mt-4 pb-2 space-y-1">
-
               <nav className="space-y-1">
                 {navigation.map((item) => {
                   const Icon = item.icon;
@@ -133,10 +152,8 @@ export function Root() {
               >
                 Sair
               </button>
-
             </div>
           )}
-
         </div>
       </header>
 
