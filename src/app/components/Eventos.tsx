@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Calendar, Clock3, Plus, Trash2, User } from "lucide-react";
 import { supabase } from "../lib/supabase";
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -41,6 +40,8 @@ export function Eventos() {
   const [eventEndDate, setEventEndDate] = useState("");
   const [imageBase64, setImageBase64] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  const canManageEvents = role === "admin" || role === "dep_eventos";
 
   useEffect(() => {
     loadAll();
@@ -141,7 +142,7 @@ export function Eventos() {
     setSubmitting(false);
 
     if (error) {
-      console.error(error);
+      console.error("Erro ao criar evento:", error);
       toast.error("Erro ao criar evento: " + error.message);
       return;
     }
@@ -163,8 +164,8 @@ export function Eventos() {
     const { error } = await supabase.from("events").delete().eq("id", id);
 
     if (error) {
-      console.error(error);
-      toast.error("Não foi possível apagar o evento.");
+      console.error("Erro ao apagar evento:", error);
+      toast.error("Não foi possível apagar o evento: " + error.message);
       return;
     }
 
@@ -183,7 +184,7 @@ export function Eventos() {
           </p>
         </div>
 
-        {role === "admin" && (
+        {canManageEvents && (
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
               <Button>
@@ -196,7 +197,7 @@ export function Eventos() {
               <DialogHeader>
                 <DialogTitle>Criar Evento</DialogTitle>
                 <DialogDescription>
-                  Apenas administradores podem criar eventos.
+                  Apenas administradores e o departamento de eventos podem criar eventos.
                 </DialogDescription>
               </DialogHeader>
 
@@ -322,7 +323,7 @@ export function Eventos() {
                   {event.description}
                 </p>
 
-                {role === "admin" && (
+                {canManageEvents && (
                   <div onClick={(e) => e.stopPropagation()}>
                     <Button
                       variant="outline"
@@ -389,7 +390,7 @@ export function Eventos() {
                   </p>
                 </div>
 
-                {role === "admin" && (
+                {canManageEvents && (
                   <div className="border-t pt-4">
                     <Button
                       variant="outline"

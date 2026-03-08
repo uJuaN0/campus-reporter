@@ -6,6 +6,7 @@ import { Eventos } from "./components/Eventos";
 import { Reportacoes } from "./components/Reportacoes";
 import { Reportar } from "./components/Reportar";
 import { Administracao } from "./components/Administracao";
+import { RoleGuard } from "./components/RoleGuard";
 
 export const router = createBrowserRouter(
   [
@@ -13,12 +14,54 @@ export const router = createBrowserRouter(
       path: "/",
       element: <Root />,
       children: [
-        { index: true, element: <Dashboard /> },
-        { path: "reportacoes", element: <Reportacoes /> },
-        { path: "achados-perdidos", element: <AchadosPerdidos /> },
-        { path: "eventos", element: <Eventos /> },
-        { path: "reportar", element: <Reportar /> },
-        { path: "administracao", element: <Administracao /> },
+        {
+          index: true,
+          element: (
+            <RoleGuard allow={["admin", "aluno"]}>
+              <Dashboard />
+            </RoleGuard>
+          ),
+        },
+        {
+          path: "reportacoes",
+          element: (
+            <RoleGuard allow={["admin", "aluno", "dep_problemas"]}>
+              <Reportacoes />
+            </RoleGuard>
+          ),
+        },
+        {
+          path: "achados-perdidos",
+          element: (
+            <RoleGuard allow={["admin", "aluno", "dep_perdidos"]}>
+              <AchadosPerdidos />
+            </RoleGuard>
+          ),
+        },
+        {
+          path: "eventos",
+          element: (
+            <RoleGuard allow={["admin", "aluno", "dep_eventos"]}>
+              <Eventos />
+            </RoleGuard>
+          ),
+        },
+        {
+          path: "reportar",
+          element: (
+            <RoleGuard allow={["admin", "aluno"]}>
+              <Reportar />
+            </RoleGuard>
+          ),
+        },
+        {
+          path: "administracao",
+          element: (
+            <RoleGuard allow={["admin"]}>
+              <Administracao />
+            </RoleGuard>
+          ),
+        },
       ],
     },
   ],

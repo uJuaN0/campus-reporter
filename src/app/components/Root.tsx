@@ -50,16 +50,29 @@ export function Root() {
     await supabase.auth.signOut();
   }
 
-  const navigation = [
-    { name: "Dashboard", href: "/", icon: Home },
-    { name: "Problemas", href: "/reportacoes", icon: AlertCircle },
-    { name: "Perdidos & Achados", href: "/achados-perdidos", icon: Package },
-    { name: "Eventos", href: "/eventos", icon: Calendar },
-    { name: "Reportar", href: "/reportar", icon: PlusCircle },
-    ...(role === "admin"
-      ? [{ name: "Administração", href: "/administracao", icon: Shield }]
-      : []),
-  ];
+  const navigation =
+    role === "admin"
+      ? [
+          { name: "Dashboard", href: "/", icon: Home },
+          { name: "Problemas", href: "/reportacoes", icon: AlertCircle },
+          { name: "Perdidos & Achados", href: "/achados-perdidos", icon: Package },
+          { name: "Eventos", href: "/eventos", icon: Calendar },
+          { name: "Reportar", href: "/reportar", icon: PlusCircle },
+          { name: "Administração", href: "/administracao", icon: Shield },
+        ]
+      : role === "dep_problemas"
+      ? [{ name: "Problemas", href: "/reportacoes", icon: AlertCircle }]
+      : role === "dep_perdidos"
+      ? [{ name: "Perdidos & Achados", href: "/achados-perdidos", icon: Package }]
+      : role === "dep_eventos"
+      ? [{ name: "Eventos", href: "/eventos", icon: Calendar }]
+      : [
+          { name: "Dashboard", href: "/", icon: Home },
+          { name: "Problemas", href: "/reportacoes", icon: AlertCircle },
+          { name: "Perdidos & Achados", href: "/achados-perdidos", icon: Package },
+          { name: "Eventos", href: "/eventos", icon: Calendar },
+          { name: "Reportar", href: "/reportar", icon: PlusCircle },
+        ];
 
   const isActive = (path: string) => {
     if (path === "/") return location.pathname === "/";

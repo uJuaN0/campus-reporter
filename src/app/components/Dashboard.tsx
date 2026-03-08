@@ -113,44 +113,81 @@ export function Dashboard() {
       ? "Aluno"
       : "Sem perfil";
 
-  const quickActions = [
-    {
-      key: "dashboard-problemas",
-      title: "Problemas",
-      description: "Ver ocorrências do campus e estados",
-      href: "/reportacoes",
-      icon: AlertCircle,
-      badge: `${problemas.length} total`,
-      colorClasses: "bg-red-50 text-red-600",
-    },
-    {
-      key: "dashboard-perdidos",
-      title: "Perdidos & Achados",
-      description: "Itens perdidos e encontrados",
-      href: "/achados-perdidos",
-      icon: Package,
-      badge: `${perdidos.length} itens`,
-      colorClasses: "bg-amber-50 text-amber-600",
-    },
-    {
-      key: "dashboard-eventos",
-      title: "Eventos",
-      description: "Acompanhar eventos do campus",
-      href: "/eventos",
-      icon: Calendar,
-      badge: `${events.length} eventos`,
-      colorClasses: "bg-blue-50 text-blue-600",
-    },
-    {
-      key: "dashboard-reportar",
-      title: "Reportar",
-      description: "Criar novo reporte rapidamente",
-      href: "/reportar",
-      icon: PlusCircle,
-      badge: "Novo",
-      colorClasses: "bg-green-50 text-green-600",
-    },
-  ];
+  const quickActions =
+    role === "dep_problemas"
+      ? [
+          {
+            key: "dashboard-problemas",
+            title: "Problemas",
+            description: "Ver ocorrências do campus e estados",
+            href: "/reportacoes",
+            icon: AlertCircle,
+            badge: `${problemas.length} total`,
+            colorClasses: "bg-red-50 text-red-600",
+          },
+        ]
+      : role === "dep_perdidos"
+      ? [
+          {
+            key: "dashboard-perdidos",
+            title: "Perdidos & Achados",
+            description: "Itens perdidos e encontrados",
+            href: "/achados-perdidos",
+            icon: Package,
+            badge: `${perdidos.length} itens`,
+            colorClasses: "bg-amber-50 text-amber-600",
+          },
+        ]
+      : role === "dep_eventos"
+      ? [
+          {
+            key: "dashboard-eventos",
+            title: "Eventos",
+            description: "Acompanhar eventos do campus",
+            href: "/eventos",
+            icon: Calendar,
+            badge: `${events.length} eventos`,
+            colorClasses: "bg-blue-50 text-blue-600",
+          },
+        ]
+      : [
+          {
+            key: "dashboard-problemas",
+            title: "Problemas",
+            description: "Ver ocorrências do campus e estados",
+            href: "/reportacoes",
+            icon: AlertCircle,
+            badge: `${problemas.length} total`,
+            colorClasses: "bg-red-50 text-red-600",
+          },
+          {
+            key: "dashboard-perdidos",
+            title: "Perdidos & Achados",
+            description: "Itens perdidos e encontrados",
+            href: "/achados-perdidos",
+            icon: Package,
+            badge: `${perdidos.length} itens`,
+            colorClasses: "bg-amber-50 text-amber-600",
+          },
+          {
+            key: "dashboard-eventos",
+            title: "Eventos",
+            description: "Acompanhar eventos do campus",
+            href: "/eventos",
+            icon: Calendar,
+            badge: `${events.length} eventos`,
+            colorClasses: "bg-blue-50 text-blue-600",
+          },
+          {
+            key: "dashboard-reportar",
+            title: "Reportar",
+            description: "Criar novo reporte rapidamente",
+            href: "/reportar",
+            icon: PlusCircle,
+            badge: "Novo",
+            colorClasses: "bg-green-50 text-green-600",
+          },
+        ];
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
