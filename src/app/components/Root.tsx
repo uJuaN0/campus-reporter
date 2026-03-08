@@ -5,12 +5,14 @@ import {
   Package,
   Calendar,
   PlusCircle,
-  Shield,
   Menu,
   X,
+  Globe,
+  Shield,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
+import { NotificationBell } from "./NotificationBell";
 
 export function Root() {
   const location = useLocation();
@@ -54,6 +56,7 @@ export function Root() {
     role === "admin"
       ? [
           { name: "Dashboard", href: "/", icon: Home },
+          { name: "Hub Internacional", href: "/hub-internacional", icon: Globe },
           { name: "Problemas", href: "/reportacoes", icon: AlertCircle },
           { name: "Perdidos & Achados", href: "/achados-perdidos", icon: Package },
           { name: "Eventos", href: "/eventos", icon: Calendar },
@@ -68,6 +71,7 @@ export function Root() {
       ? [{ name: "Eventos", href: "/eventos", icon: Calendar }]
       : [
           { name: "Dashboard", href: "/", icon: Home },
+          { name: "Hub Internacional", href: "/hub-internacional", icon: Globe },
           { name: "Problemas", href: "/reportacoes", icon: AlertCircle },
           { name: "Perdidos & Achados", href: "/achados-perdidos", icon: Package },
           { name: "Eventos", href: "/eventos", icon: Calendar },
@@ -82,30 +86,32 @@ export function Root() {
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow-sm border-b sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-700 rounded-lg flex items-center justify-center">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between gap-6">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 bg-blue-700 rounded-xl flex items-center justify-center shrink-0">
                 <span className="text-white font-bold text-lg">NC</span>
               </div>
 
-              <div>
-                <h1 className="text-xl font-bold text-gray-900">NOVA Connect</h1>
-                <p className="text-xs text-gray-500">
+              <div className="min-w-0">
+                <h1 className="text-xl font-bold text-gray-900 leading-tight">
+                  NOVA Connect
+                </h1>
+                <p className="text-xs text-gray-500 leading-tight">
                   Faculdade de Ciências e Tecnologia
                 </p>
               </div>
             </div>
 
             <button
-              className="md:hidden p-2 rounded-lg hover:bg-gray-100"
+              className="md:hidden p-2 rounded-lg hover:bg-gray-100 shrink-0"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
 
-            <div className="hidden md:flex items-center gap-2">
-              <nav className="flex items-center gap-2">
+            <div className="hidden md:flex items-center gap-3 min-w-0">
+              <nav className="flex items-center gap-1 overflow-x-auto no-scrollbar">
                 {navigation.map((item) => {
                   const Icon = item.icon;
 
@@ -113,22 +119,26 @@ export function Root() {
                     <Link
                       key={item.href}
                       to={item.href}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                      className={`flex items-center gap-2 px-3 py-2 rounded-xl transition-colors whitespace-nowrap text-sm font-medium ${
                         isActive(item.href)
-                          ? "bg-blue-50 text-blue-700"
+                          ? "bg-blue-100 text-blue-700"
                           : "text-gray-700 hover:bg-gray-100"
                       }`}
                     >
-                      <Icon className="w-4 h-4" />
-                      <span>{item.name}</span>
+                      <Icon className="w-4 h-4 shrink-0" />
+                      <span className="whitespace-nowrap">{item.name}</span>
                     </Link>
                   );
                 })}
               </nav>
 
+              <div className="shrink-0">
+                <NotificationBell />
+              </div>
+
               <button
                 onClick={handleLogout}
-                className="ml-4 px-4 py-2 rounded-lg bg-gray-900 text-white hover:bg-gray-800"
+                className="shrink-0 ml-1 px-4 py-2 rounded-xl bg-gray-900 text-white hover:bg-gray-800 font-medium"
               >
                 Sair
               </button>
@@ -137,6 +147,10 @@ export function Root() {
 
           {mobileMenuOpen && (
             <div className="md:hidden mt-4 pb-2 space-y-1">
+              <div className="px-2 pb-2">
+                <NotificationBell />
+              </div>
+
               <nav className="space-y-1">
                 {navigation.map((item) => {
                   const Icon = item.icon;

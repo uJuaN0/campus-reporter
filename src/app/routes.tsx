@@ -7,6 +7,7 @@ import { Reportacoes } from "./components/Reportacoes";
 import { Reportar } from "./components/Reportar";
 import { Administracao } from "./components/Administracao";
 import { RoleGuard } from "./components/RoleGuard";
+import { HubInternacional } from "./components/HubInternacional";
 
 export const router = createBrowserRouter(
   [
@@ -19,6 +20,14 @@ export const router = createBrowserRouter(
           element: (
             <RoleGuard allow={["admin", "aluno"]}>
               <Dashboard />
+            </RoleGuard>
+          ),
+        },
+        {
+          path: "hub-internacional",
+          element: (
+            <RoleGuard allow={["admin", "aluno"]}>
+              <HubInternacional />
             </RoleGuard>
           ),
         },

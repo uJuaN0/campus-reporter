@@ -11,6 +11,7 @@ import {
   Clock3,
   User,
   MessageCircle,
+  Bell,
 } from "lucide-react";
 import { supabase } from "../lib/supabase";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
@@ -81,6 +82,9 @@ export function AchadosPerdidos() {
   const [imageBase64, setImageBase64] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
+  const [myUserId, setMyUserId] = useState<string | null>(null);
+  const [subscriptions, setSubscriptions] = useState<number[]>([]);
+
   const canManageLostFound = role === "admin" || role === "dep_perdidos";
 
   useEffect(() => {
@@ -95,6 +99,8 @@ export function AchadosPerdidos() {
     } = await supabase.auth.getUser();
 
     if (user) {
+      setMyUserId(user.id);
+
       const { data: profile } = await supabase
         .from("profiles")
         .select("role")
@@ -102,8 +108,17 @@ export function AchadosPerdidos() {
         .maybeSingle();
 
       setRole(profile?.role ?? null);
+
+      const { data: subs } = await supabase
+        .from("notification_subscriptions")
+        .select("report_id")
+        .eq("user_id", user.id);
+
+      setSubscriptions((subs ?? []).map((s) => s.report_id));
     } else {
       setRole(null);
+      setMyUserId(null);
+      setSubscriptions([]);
     }
 
     const { data, error } = await supabase
@@ -245,6 +260,54 @@ export function AchadosPerdidos() {
     await loadAll();
   }
 
+  async function toggleNotification(item: LostItem) {
+    if (!myUserId) {
+      toast.error("Precisas de iniciar sessão.");
+      return;
+    }
+
+    const isSubscribed = subscriptions.includes(item.id);
+
+    if (isSubscribed) {
+      const { error } = await supabase
+        .from("notification_subscriptions")
+        .delete()
+        .eq("user_id", myUserId)
+        .eq("report_id", item.id);
+
+      if (error) {
+        console.error(error);
+        toast.error("Não foi possível desativar notificações.");
+        return;
+      }
+
+      setSubscriptions((prev) => prev.filter((id) => id !== item.id));
+      toast.success("Notificações desativadas.");
+    } else {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      const { error } = await supabase.from("notification_subscriptions").insert([
+        {
+          user_id: myUserId,
+          user_email: user?.email ?? null,
+          report_id: item.id,
+          report_type: item.type,
+        },
+      ]);
+
+      if (error) {
+        console.error(error);
+        toast.error("Não foi possível ativar notificações.");
+        return;
+      }
+
+      setSubscriptions((prev) => [...prev, item.id]);
+      toast.success("Notificações ativadas.");
+    }
+  }
+
   async function handleToggleStatus(item: LostItem, nextStatus: "Perdido" | "Achado") {
     const { error } = await supabase
       .from("reports")
@@ -255,6 +318,23 @@ export function AchadosPerdidos() {
       console.error(error);
       toast.error("Não foi possível alterar o estado.");
       return;
+    }
+
+    const { data: subs } = await supabase
+      .from("notification_subscriptions")
+      .select("user_id")
+      .eq("report_id", item.id);
+
+    if (subs && subs.length > 0) {
+      await supabase.from("notifications").insert(
+        subs.map((sub) => ({
+          user_id: sub.user_id,
+          title: "Estado de item atualizado",
+          message: `O item "${item.title}" mudou para "${nextStatus}".`,
+          report_id: item.id,
+          report_type: item.type,
+        }))
+      );
     }
 
     toast.success(`Estado alterado para ${nextStatus}.`);
@@ -470,6 +550,7 @@ export function AchadosPerdidos() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredItems.map((item) => {
             const commentCount = commentsByReport[item.id]?.length || 0;
+            const subscribed = subscriptions.includes(item.id);
 
             return (
               <Card
@@ -530,41 +611,47 @@ export function AchadosPerdidos() {
                     {item.description}
                   </p>
 
-                  {canManageLostFound ? (
-                    <div className="space-y-2" onClick={(e) => e.stopPropagation()}>
-                      <Button
-                        variant="outline"
-                        className="w-full"
-                        onClick={() =>
-                          handleToggleStatus(
-                            item,
-                            item.status === "Achado" ? "Perdido" : "Achado"
-                          )
-                        }
-                      >
-                        <CheckCircle className="w-4 h-4 mr-2" />
-                        Marcar como {item.status === "Achado" ? "Perdido" : "Achado"}
-                      </Button>
-
-                      <Button
-                        variant="outline"
-                        className="w-full"
-                        onClick={() => handleDeleteItem(item)}
-                      >
-                        <Trash2 className="w-4 h-4 mr-2" />
-                        Apagar
-                      </Button>
-                    </div>
-                  ) : (
+                  <div className="space-y-2" onClick={(e) => e.stopPropagation()}>
                     <Button
                       variant="outline"
                       className="w-full"
-                      onClick={(e) => e.stopPropagation()}
-                      disabled
+                      onClick={() => toggleNotification(item)}
                     >
-                      Apenas visualização
+                      <Bell className="w-4 h-4 mr-2" />
+                      {subscribed ? "Desativar notificações" : "Ativar notificações"}
                     </Button>
-                  )}
+
+                    {canManageLostFound ? (
+                      <>
+                        <Button
+                          variant="outline"
+                          className="w-full"
+                          onClick={() =>
+                            handleToggleStatus(
+                              item,
+                              item.status === "Achado" ? "Perdido" : "Achado"
+                            )
+                          }
+                        >
+                          <CheckCircle className="w-4 h-4 mr-2" />
+                          Marcar como {item.status === "Achado" ? "Perdido" : "Achado"}
+                        </Button>
+
+                        <Button
+                          variant="outline"
+                          className="w-full"
+                          onClick={() => handleDeleteItem(item)}
+                        >
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Apagar
+                        </Button>
+                      </>
+                    ) : (
+                      <Button variant="outline" className="w-full" disabled>
+                        Apenas visualização
+                      </Button>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
             );
@@ -629,6 +716,17 @@ export function AchadosPerdidos() {
                   </p>
                 </div>
 
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => toggleNotification(selectedItem)}
+                >
+                  <Bell className="w-4 h-4 mr-2" />
+                  {subscriptions.includes(selectedItem.id)
+                    ? "Desativar notificações"
+                    : "Ativar notificações"}
+                </Button>
+
                 <div className="border-t pt-4 space-y-4">
                   <div className="flex items-center gap-2">
                     <MessageCircle className="w-5 h-5 text-gray-600" />
@@ -639,15 +737,10 @@ export function AchadosPerdidos() {
 
                   <div className="space-y-3">
                     {selectedComments.length === 0 ? (
-                      <p className="text-sm text-gray-500">
-                        Ainda não há comentários.
-                      </p>
+                      <p className="text-sm text-gray-500">Ainda não há comentários.</p>
                     ) : (
                       selectedComments.map((comment) => (
-                        <div
-                          key={comment.id}
-                          className="rounded-xl border bg-gray-50 p-3"
-                        >
+                        <div key={comment.id} className="rounded-xl border bg-gray-50 p-3">
                           <div className="text-sm font-medium text-gray-900">
                             {comment.created_by_email || "Desconhecido"}
                           </div>

@@ -237,7 +237,7 @@ export function Dashboard() {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 gap-6 mb-8">
         <Card className="xl:col-span-2">
           <CardHeader>
             <CardTitle>Ações rápidas</CardTitle>
@@ -275,37 +275,7 @@ export function Dashboard() {
             </div>
           </CardContent>
         </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Resumo</CardTitle>
-            <CardDescription>Estado atual da plataforma.</CardDescription>
-          </CardHeader>
-
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">Problemas pendentes</span>
-              <Badge variant="outline">{problemasPendentes}</Badge>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">Problemas resolvidos</span>
-              <Badge variant="outline">{problemasResolvidos}</Badge>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">Itens perdidos/achados</span>
-              <Badge variant="outline">{perdidos.length}</Badge>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">Eventos futuros</span>
-              <Badge variant="outline">{proximosEventos.length}</Badge>
-            </div>
-          </CardContent>
-        </Card>
       </div>
-
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
