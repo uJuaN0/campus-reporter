@@ -13,6 +13,8 @@ import {
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 import { NotificationBell } from "./NotificationBell";
+import { Footer } from "./Footer";
+import logoImg from "../../assets/logo.png";
 
 export function Root() {
   const location = useLocation();
@@ -89,8 +91,8 @@ export function Root() {
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between gap-6">
             <div className="flex items-center gap-3 min-w-0">
-              <div className="w-10 h-10 bg-blue-700 rounded-xl flex items-center justify-center shrink-0">
-                <span className="text-white font-bold text-lg">NC</span>
+              <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shrink-0 shadow-sm">
+                <img src={logoImg} alt="NOVA Connect" className="w-8 h-auto" />
               </div>
 
               <div className="min-w-0">
@@ -187,6 +189,8 @@ export function Root() {
       <main>
         <Outlet />
       </main>
+
+      <Footer />
     </div>
   );
 }
