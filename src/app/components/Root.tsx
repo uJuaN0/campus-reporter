@@ -116,6 +116,28 @@ export function Root() {
               <nav className="flex items-center gap-1 overflow-x-auto no-scrollbar">
                 {navigation.map((item) => {
                   const Icon = item.icon;
+                  const isHighlighted = item.href === "/reportar" || item.href === "/hub-internacional";
+
+                  if (isHighlighted) {
+                    return (
+                      <Link
+                        key={item.href}
+                        to={item.href}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all whitespace-nowrap text-sm font-semibold shadow-sm hover:shadow-md transform hover:scale-105 ${
+                          item.href === "/reportar"
+                            ? isActive(item.href)
+                              ? "bg-gradient-to-r from-green-600 to-green-700 text-white"
+                              : "bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700"
+                            : isActive(item.href)
+                            ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white"
+                            : "bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700"
+                        }`}
+                      >
+                        <Icon className="w-4 h-4 shrink-0" />
+                        <span className="whitespace-nowrap">{item.name}</span>
+                      </Link>
+                    );
+                  }
 
                   return (
                     <Link
@@ -156,6 +178,25 @@ export function Root() {
               <nav className="space-y-1">
                 {navigation.map((item) => {
                   const Icon = item.icon;
+                  const isHighlighted = item.href === "/reportar" || item.href === "/hub-internacional";
+
+                  if (isHighlighted) {
+                    return (
+                      <Link
+                        key={item.href}
+                        to={item.href}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className={`flex items-center gap-3 px-4 py-3 rounded-lg font-semibold ${
+                          item.href === "/reportar"
+                            ? "bg-gradient-to-r from-green-500 to-green-600 text-white"
+                            : "bg-gradient-to-r from-blue-500 to-blue-600 text-white"
+                        }`}
+                      >
+                        <Icon className="w-5 h-5" />
+                        <span>{item.name}</span>
+                      </Link>
+                    );
+                  }
 
                   return (
                     <Link

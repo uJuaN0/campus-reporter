@@ -8,6 +8,7 @@ import {
   ArrowRight,
   User,
   Clock3,
+  Globe,
 } from "lucide-react";
 import { supabase } from "../lib/supabase";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
@@ -152,6 +153,26 @@ export function Dashboard() {
         ]
       : [
           {
+            key: "dashboard-hub",
+            title: "Hub Internacional",
+            description: "Conecte-se com a comunidade internacional",
+            href: "/hub-internacional",
+            icon: Globe,
+            badge: "Destacado",
+            colorClasses: "bg-gradient-to-br from-blue-500 to-blue-600 text-white",
+            highlight: true,
+          },
+          {
+            key: "dashboard-reportar",
+            title: "Reportar",
+            description: "Criar novo reporte rapidamente",
+            href: "/reportar",
+            icon: PlusCircle,
+            badge: "Novo",
+            colorClasses: "bg-gradient-to-br from-green-500 to-green-600 text-white",
+            highlight: true,
+          },
+          {
             key: "dashboard-problemas",
             title: "Problemas",
             description: "Ver ocorrências do campus e estados",
@@ -177,15 +198,6 @@ export function Dashboard() {
             icon: Calendar,
             badge: `${events.length} eventos`,
             colorClasses: "bg-blue-50 text-blue-600",
-          },
-          {
-            key: "dashboard-reportar",
-            title: "Reportar",
-            description: "Criar novo reporte rapidamente",
-            href: "/reportar",
-            icon: PlusCircle,
-            badge: "Novo",
-            colorClasses: "bg-green-50 text-green-600",
           },
         ];
 
@@ -250,21 +262,36 @@ export function Dashboard() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {quickActions.map((action) => {
                 const Icon = action.icon;
+                const isHighlight = action.highlight === true;
 
                 return (
                   <Link key={action.key} to={action.href}>
-                    <div className="rounded-2xl border p-4 hover:shadow-md transition-shadow h-full">
+                    <div className={`rounded-2xl p-5 h-full transition-all ${
+                      isHighlight 
+                        ? "bg-gradient-to-br shadow-lg hover:shadow-xl transform hover:scale-[1.02] border-0 " + action.colorClasses
+                        : "border hover:shadow-md transition-shadow"
+                    }`}>
                       <div className="flex items-start justify-between mb-3">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${action.colorClasses}`}>
-                          <Icon className="w-5 h-5" />
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                          isHighlight ? "bg-white/20 backdrop-blur-sm" : action.colorClasses
+                        }`}>
+                          <Icon className={`w-6 h-6 ${isHighlight ? "text-white" : ""}`} />
                         </div>
-                        <Badge variant="secondary">{action.badge}</Badge>
+                        <Badge variant={isHighlight ? "default" : "secondary"} className={isHighlight ? "bg-white/20 text-white border-white/30" : ""}>
+                          {action.badge}
+                        </Badge>
                       </div>
 
-                      <h3 className="font-semibold text-gray-900 mb-1">{action.title}</h3>
-                      <p className="text-sm text-gray-600 mb-4">{action.description}</p>
+                      <h3 className={`font-bold mb-2 ${
+                        isHighlight ? "text-white text-lg" : "text-gray-900"
+                      }`}>{action.title}</h3>
+                      <p className={`text-sm mb-4 ${
+                        isHighlight ? "text-white/90" : "text-gray-600"
+                      }`}>{action.description}</p>
 
-                      <div className="flex items-center text-sm font-medium text-blue-600">
+                      <div className={`flex items-center text-sm font-semibold ${
+                        isHighlight ? "text-white" : "text-blue-600"
+                      }`}>
                         Abrir
                         <ArrowRight className="w-4 h-4 ml-1" />
                       </div>
