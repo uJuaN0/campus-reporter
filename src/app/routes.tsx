@@ -75,6 +75,6 @@ export const router = createBrowserRouter(
     },
   ],
   {
-    basename: "/campus-reporter/",
+    basename: "/Nova-Connect/",
   }
 );
